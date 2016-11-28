@@ -13,15 +13,14 @@
 
 #define MAXLIST 100
 #define menuchinh 0
-#define nhaphh 1
-#define indshangtonkho 2
-#define nhapnv 3
-#define indsnhanvien 4
-#define laphd 5
-#define inhoadon 6
-#define thongkehd 7
-#define topnv 8
-#define thoat 9
+#define indshangtonkho 1
+#define nhapnv 2
+#define indsnhanvien 3
+#define laphd 4
+#define inhoadon 5
+#define thongkehd 6
+#define topnv 7
+#define thoat 8
 
 #define CHU 999
 #define SO 888
@@ -112,7 +111,7 @@ typedef struct nhan_vien *DSNV;
 
 /** Chi Tiet Hoa Don */
 typedef struct{
-	string mahh;
+	float mahh;
 	int soluong;
 	float dongia;
 	float vat;
@@ -304,6 +303,15 @@ void themCTHoaDon(CTHD &ds, CTHoaDon cthd){
 	ds.n++;
 }
 
+void inCTHoaDon(int x, CTHD &ds){
+	if(ds.n==0){
+		return;
+	}
+	for(int i=0;i<ds.n;i++){
+		in(x,wherey(),"| "+toString(ds.ds[i].mahh)+" -- "+toString(ds.ds[i].soluong));
+	}
+}
+
 void inCTHoaDon(int x, int y, CTHD &ds){
 	if(ds.n==0){
 		return;
@@ -316,7 +324,7 @@ void inCTHoaDon(int x, int y, CTHD &ds){
 	y++;
 	for(int i=0;i<ds.n;i++){
 		in(x,y+i,"| "+toString(i+1));
-		in(x+5,y+i,ds.ds[i].mahh);
+		in(x+5,y+i,toString(ds.ds[i].mahh));
 		in(x+20,y+i,toString(ds.ds[i].soluong));
 		in(x+35,y+i,toString(ds.ds[i].dongia));
 		in(x+55,y+i,toString(ds.ds[i].vat));
@@ -471,7 +479,7 @@ void loadCTHoaDon(){
 			DSHD hd = layHoaDon(line,tcHoaDon);
 			
 			getline(file,line);
-			cthd.mahh = line;
+			cthd.mahh = toFloat(line);
 			
 			getline(file,line);
 			cthd.soluong = toInt(line);
@@ -521,74 +529,23 @@ string nhap(int kieu, int size){
 void gdMenuChinh(){
 	xoaManHinh();
 	cout<< "QUAN LY XUAT NHAP HANG"<< endl << endl;
-	cout << "1.Nhap hang." << endl;
-	cout << "2.In danh sach hang ton kho." << endl;
-	cout << "3.Nhap nhan vien." << endl;
-	cout << "4.In danh sach nhan vien theo thu tu tang dan." << endl;
-	cout << "5.Lap hoa don." << endl;
-	cout << "6.In hoa don." << endl;
-	cout << "7.Thong ke hoa don." << endl;
-	cout << "8.Top 10 nhan vien co so phieu xuat cao nhat." << endl;
-	cout << "9.Thoat." << endl;
+	cout << "1.In danh sach hang ton kho." << endl;
+	cout << "2.Nhap nhan vien." << endl;
+	cout << "3.In danh sach nhan vien theo thu tu tang dan." << endl;
+	cout << "4.Lap hoa don." << endl;
+	cout << "5.In hoa don." << endl;
+	cout << "6.Thong ke hoa don." << endl;
+	cout << "7.Top 10 nhan vien co so phieu xuat cao nhat." << endl;
+	cout << "8.Thoat." << endl;
 	cout << "Moi ban chon menu tu 1->8: ";
 	string s="9";
 	do{
 		s = nhap(SO,1);
-		if(s=="thoat"){
+		if(s=="thoat" || s=="0" || s=="9"){
 			return;
 		}
-	}while(toInt(s)<=0);
+	}while(1);
 	flag = toInt(s);
-}
-
-void gdNhapHang(){
-	int c=0;
-	do{
-		xoaManHinh();
-		in(70,0,"| Tat ca cac mat hang\n");
-		gotoxy(70,wherey());
-		inTatCaHangHoa(70,tcHangHoa);
-		
-		gotoxy(0,0);
-		HangHoa hh;
-		cout << "NHAP HANG" << endl;
-		cout << "Ma hang hoa: ";
-		string mahh="";
-		do{
-			mahh = nhap(SO,10);
-			if(mahh=="thoat")return;
-			if(layHangHoa(toFloat(mahh),tcHangHoa)!=NULL){
-				cout << "\nHang nay da ton tai, vui long nhap lai! \nMa hang hoa: ";
-			}else{
-				break;
-			}
-		}while(1);
-		cout << "\nTen hang hoa: ";
-		string res = nhap(CHU,30);
-		if(res=="thoat")return;
-		hh.tenhh=res;
-		cout << "\nDon vi tinh: ";
-		res = nhap(CHU,10);
-		if(res=="thoat")return;
-		hh.dvt=res;
-		cout << "\nSo luong: ";
-		res = nhap(SO,10);
-		if(res=="thoat")return;
-		hh.slt = toInt(res);
-		
-		themHangHoa(tcHangHoa,toFloat(mahh),hh);
-		
-		int lasty = wherey();
-		in(70,0,"| Tat ca cac mat hang\n");
-		gotoxy(70,wherey());
-		inTatCaHangHoa(70,tcHangHoa);
-		
-		
-		in(0,lasty,"\n\nThem thanh cong!");
-		cout << "\nNhan phim bat ki de nhap tiep, Escape de thoat...";
-		c = getch();
-	}while(c!=ESCAPE);
-	flag = menuchinh;
 }
 
 void gdDanhSachHangTon(){
@@ -670,6 +627,143 @@ void gdDanhSachNhanVien(){
 	flag = menuchinh;
 }
 
+void gdChiTietHoaDonNhap(DSHD &hd){
+	int c=0;
+	do{
+		xoaManHinh();
+		in(70,0,"| Tat ca cac mat hang\n");
+		gotoxy(70,wherey());
+		inTatCaHangHoa(70,tcHangHoa);
+		
+		gotoxy(0,0);
+		HangHoa hh;
+		CTHoaDon cthd;
+		cout << "CHI TIET HOA DON NHAP HANG" << endl;
+		string mahh="",res="";
+		cout << "\nMa hang hoa: ";
+		mahh = nhap(SO,10);
+		if(mahh=="thoat")return;
+		cthd.mahh = toFloat(mahh);
+		DSHH h = layHangHoa(toFloat(mahh),tcHangHoa);
+		if(h!=NULL){
+			cout << "\nTen hang hoa: " << h->hanghoa.tenhh;
+			cout << "\nDon vi tinh: " << h->hanghoa.dvt;
+			cout << "\nSo luong them: ";
+			res = nhap(SO,10);
+			if(res=="thoat")return;
+			h->hanghoa.slt+=toInt(res);
+			
+			cthd.soluong = toInt(res);
+		}else{
+			cout << "\nTen hang hoa: ";
+			res = nhap(CHU,30);
+			if(res=="thoat")return;
+			hh.tenhh=res;
+			
+			cout << "\nDon vi tinh: ";
+			res = nhap(CHU,10);
+			if(res=="thoat")return;
+			hh.dvt=res;
+			
+			cout << "\nSo luong: ";
+			res = nhap(SO,10);
+			if(res=="thoat")return;
+			hh.slt = toInt(res);
+			
+			cthd.soluong = toInt(res);
+			
+			themHangHoa(tcHangHoa,toFloat(mahh),hh);
+		}
+		cout << "\nDon gia: ";
+		res = nhap(SO,10);
+		if(res=="thoat")return;
+		cthd.dongia = toFloat(res);
+		
+		cout << "\n% VAT: ";
+		res = nhap(SO,10);
+		if(res=="thoat")return;
+		cthd.vat = toFloat(res);
+		
+		themCTHoaDon(hd->hoadon.cthd,cthd);
+		
+		int lasty = wherey();
+		in(70,0,"| Tat ca cac mat hang\n");
+		gotoxy(70,wherey());
+		inTatCaHangHoa(70,tcHangHoa);
+		
+		
+		in(0,lasty,"\n\nThem thanh cong!");
+		cout << "\nNhan phim bat ki de nhap tiep, Escape de thoat...";
+		c = getch();
+	}while(c!=ESCAPE);
+	flag = menuchinh;
+}
+
+void gdChiTietHoaDonXuat(DSHD &hd){
+	int c=0;
+	do{
+		xoaManHinh();
+		in(70,0,"| Tat ca cac mat hang\n");
+		gotoxy(70,wherey());
+		inTatCaHangHoa(70,tcHangHoa);
+		
+		gotoxy(0,0);
+		CTHoaDon cthd;
+		cout << "CHI TIET HOA DON XUAT HANG" << endl;
+		string mahh="",res="";
+		DSHH hh;
+		do{
+			cout << "\nMa hang hoa: ";
+			mahh = nhap(SO,10);
+			if(mahh=="thoat")return;
+			hh = layHangHoa(toFloat(mahh),tcHangHoa);
+			if(hh==NULL){
+				cout << "\nHang hoa nay KHONG ton tai, vui long nhap lai...";
+			}else{
+				break;
+			}
+		}while(1);
+		cout << "\nTen hang hoa: " << hh->hanghoa.tenhh;
+		cout << "\nDon vi tinh: " << hh->hanghoa.dvt;
+		cout << "\nSo luong ton: " << hh->hanghoa.slt;
+		do{
+			cout << "\nSo luong hang xuat ra: ";
+			res = nhap(SO,10);
+			if(res=="thoat")return;
+			if(toInt(res)>hh->hanghoa.slt){
+				cout << "So luong xuat lon hon so luong ton, vui long nhap lai...";
+			}else{
+				break;
+			}
+		}while(1);
+		
+		cthd.soluong = toInt(res);
+		hh->hanghoa.slt-=toInt(res);
+		
+		cout << "\nDon gia: ";
+		res = nhap(SO,10);
+		if(res=="thoat")return;
+		cthd.dongia = toFloat(res);
+		
+		cout << "\n% VAT: ";
+		res = nhap(SO,10);
+		if(res=="thoat")return;
+		cthd.vat = toFloat(res);
+		
+		themCTHoaDon(hd->hoadon.cthd,cthd);
+				
+		int lasty = wherey();
+		in(70,0,"| Tat ca cac mat hang\n");
+		gotoxy(70,wherey());
+		inTatCaHangHoa(70,tcHangHoa);
+		
+		in(0,lasty,"\n\nThem thanh cong!");
+		cout << "\nNhan phim bat ki de nhap tiep, Escape de thoat...";
+		c = getch();
+	}while(c!=ESCAPE);
+	flag = menuchinh;
+}
+
 void gdLapHoaDon(){
 	int c=0;
 	do{
@@ -733,12 +827,17 @@ void gdLapHoaDon(){
 		hd.lhd=res;
 		
 		themHoaDon(tcHoaDon,hd);
+		
+		if(hd.lhd=="x"){
+			gdChiTietHoaDonXuat(layHoaDon(hd.sohd,tcHoaDon));
+		}else{
+			gdChiTietHoaDonNhap(layHoaDon(hd.sohd,tcHoaDon));
+		}
 				
 		int lasty = wherey();
 		in(70,0,"| Tat ca cac hoa don\n");
 		gotoxy(70,wherey());
 		inTatCaHoaDon(70,tcHoaDon);
-		
 		
 		in(0,lasty,"\n\nThem thanh cong!");
 		cout << "\nNhan phim bat ki de nhap tiep, Escape de thoat...";
@@ -771,9 +870,6 @@ int main(int argc, char** argv) {
 			case menuchinh:
 				gdMenuChinh();
 				break;
-			case nhaphh:
-				gdNhapHang();
-				break;
 			case indshangtonkho:
 				gdDanhSachHangTon();
 				break;
@@ -791,8 +887,5 @@ int main(int argc, char** argv) {
 				break;
 		}
 	}
-	
-	gdMenuChinh();
-	cout << flag;
 	return 0;
 }
