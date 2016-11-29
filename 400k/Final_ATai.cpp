@@ -75,6 +75,25 @@ int toInt(string s){
 float toFloat(string s){
 	return atof(s.c_str());
 }
+int laySoNgay(int thang, int year){
+	switch(thang){
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10:
+		case 12:
+			return 31;
+		case 4:
+		case 6:
+		case 9:
+		case 11:
+			return 30;
+		case 2:
+			return (year%4==0?29:28);
+	}
+}
 //============== End Others ===================
 //============== khai bao =======================
 typedef struct{
@@ -102,6 +121,7 @@ typedef struct{
 	string ho;
 	string ten;
 	string phai;
+	int shd;
 }NhanVien;
 struct nhan_vien{
 	NhanVien nhanvien;
@@ -171,7 +191,7 @@ void inTatCaHangHoa(int x,DSHH &ds){
 	if(ds!=NULL){
 		inTatCaHangHoa(x,ds->left);
 		in(x,wherey(),khoangTrang(50));
-		in(x,wherey(),"| "+toString(ds->mahh)+" -- "+ds->hanghoa.tenhh+"\n");
+		in(x,wherey(),"| "+toString(ds->mahh)+" -- "+ds->hanghoa.tenhh+" -- "+toString(ds->hanghoa.slt)+"\n");
 		inTatCaHangHoa(x,ds->right);
 	}
 }
@@ -245,17 +265,28 @@ string toLowerCase(string s){
 	return res;
 }
 void sapXepNV(DSNV &ds){
-	if(ds==NULL){
-		return;
-	}
+	if(ds==NULL)return;
 	for(DSNV p=ds; p->next!=NULL; p=p->next){
 		string ten1 = toLowerCase(p->nhanvien.ten);
 		for(DSNV q=p->next; q!=NULL; q=q->next){
 			string ten2 = toLowerCase(q->nhanvien.ten);
-			if(ten2[0]<=ten1[0]){
-				DSNV temp = q;
-				q=p;
-				p=temp;
+			if(strcmp(ten1.c_str(),ten2.c_str())>0){
+				NhanVien temp = q->nhanvien;
+				q->nhanvien=p->nhanvien;
+				p->nhanvien=temp;
+			}
+		}
+	}
+}
+
+void sapXepTopNV(DSNV &ds){
+	if(ds==NULL)return;
+	for(DSNV p=ds; p->next!=NULL; p=p->next){
+		for(DSNV q=p->next; q!=NULL;q=q->next){
+			if(p->nhanvien.shd <= q->nhanvien.shd){
+				NhanVien temp = p->nhanvien;
+				p->nhanvien = q->nhanvien;
+				q->nhanvien = temp;
 			}
 		}
 	}
@@ -384,16 +415,6 @@ void inTatCaHoaDon(int x, int y, DSHD &ds){
 	}
 }
 
-int demSoHoaDonXuat(string manv){
-	int tong=0;
-	for(DSHD p=tcHoaDon; p!=NULL; p=p->next){
-		if(p->hoadon.manv==manv && p->hoadon.lhd=="x"){
-			tong++;
-		}
-	}
-	return tong;
-}
-
 /** doc file */
 void loadHangHoa(){
 	string filename = "hanghoa.txt";
@@ -434,6 +455,7 @@ void loadNhanVien(){
 			p.ten = line;
 			getline(file,line);
 			p.phai = line;
+			p.shd=0;
 			themNhanVien(tcNhanVien, p);
 		}
 	}
@@ -543,6 +565,8 @@ void gdMenuChinh(){
 		s = nhap(SO,1);
 		if(s=="thoat" || s=="0" || s=="9"){
 			return;
+		}else{
+			break;
 		}
 	}while(1);
 	flag = toInt(s);
@@ -602,6 +626,7 @@ void gdNhapNhanvien(){
 			}
 		}while(1);
 		nv.phai=res;
+		nv.shd=0;
 		
 		themNhanVien(tcNhanVien,nv);
 		
@@ -620,6 +645,8 @@ void gdNhapNhanvien(){
 
 void gdDanhSachNhanVien(){
 	xoaManHinh();
+	sapXepNV(tcNhanVien);
+	sapXepNV(tcNhanVien);
 	cout << "CAC NHAN VIEN SAP XEP THEO TEN\n" << endl << endl;
 	inDSNhanVien(wherex(),wherey(),tcNhanVien);
 	cout << "\n\nNhan phim bat ki de thoat...";
@@ -627,7 +654,7 @@ void gdDanhSachNhanVien(){
 	flag = menuchinh;
 }
 
-void gdChiTietHoaDonNhap(DSHD &hd){
+void gdChiTietHoaDonNhap(DSHD hd){
 	int c=0;
 	do{
 		xoaManHinh();
@@ -648,6 +675,7 @@ void gdChiTietHoaDonNhap(DSHD &hd){
 		if(h!=NULL){
 			cout << "\nTen hang hoa: " << h->hanghoa.tenhh;
 			cout << "\nDon vi tinh: " << h->hanghoa.dvt;
+			cout << "\nSo luong ton: " << h->hanghoa.slt;
 			cout << "\nSo luong them: ";
 			res = nhap(SO,10);
 			if(res=="thoat")return;
@@ -699,7 +727,7 @@ void gdChiTietHoaDonNhap(DSHD &hd){
 	flag = menuchinh;
 }
 
-void gdChiTietHoaDonXuat(DSHD &hd){
+void gdChiTietHoaDonXuat(DSHD hd){
 	int c=0;
 	do{
 		xoaManHinh();
@@ -827,19 +855,26 @@ void gdLapHoaDon(){
 		hd.lhd=res;
 		
 		themHoaDon(tcHoaDon,hd);
-		
+		DSHD t = layHoaDon(hd.sohd,tcHoaDon);
 		if(hd.lhd=="x"){
-			gdChiTietHoaDonXuat(layHoaDon(hd.sohd,tcHoaDon));
+			gdChiTietHoaDonXuat(t);
+			layNhanVien(hd.manv,tcNhanVien)->nhanvien.shd++;
 		}else{
-			gdChiTietHoaDonNhap(layHoaDon(hd.sohd,tcHoaDon));
+			gdChiTietHoaDonNhap(t);
 		}
-				
-		int lasty = wherey();
+		xoaManHinh();
 		in(70,0,"| Tat ca cac hoa don\n");
 		gotoxy(70,wherey());
 		inTatCaHoaDon(70,tcHoaDon);
 		
-		in(0,lasty,"\n\nThem thanh cong!");
+		gotoxy(0,0);
+		cout << "NHAP HOA DON" << endl;
+		cout << "\nSo hoa don: " << hd.sohd;
+		cout << "\nNgay lap: " << xuLyNgay(hd.ngay);
+		cout << "\nMa nhan vien: " << hd.manv;
+		cout << "\nLoai: " << (hd.lhd=="n"?"nhap":"xuat");
+		
+		in(0,wherey(),"\n\nThem thanh cong!");
 		cout << "\nNhan phim bat ki de nhap tiep, Escape de thoat...";
 		c = getch();
 	}while(c!=ESCAPE);
@@ -850,6 +885,54 @@ void gdTatCaHoaDon(){
 	xoaManHinh();
 	cout << "CHI TIET TAT CA CAC HOA DON\n" << endl << endl;
 	inTatCaHoaDon(wherex(),wherey(),tcHoaDon);
+	cout << "\n\nNhan phim bat ki de thoat...";
+	getch();
+	flag = menuchinh;
+}
+
+void gdTopNV(){
+	xoaManHinh();
+	sapXepTopNV(tcNhanVien);
+	cout << "TOP 10 NHAN VIEN CO SO HOA DON XUAT NHIEU NHAT" << endl << endl;
+	int i=0;
+	in(0,wherey(),"Ma nhan vien");
+	in(15,wherey(),"Ten nhan vien");
+	in(35,wherey(),"So hoa don xuat\n");
+	for(DSNV p=tcNhanVien; p!=NULL; p=p->next){
+		i++;
+		in(0,wherey(),p->nhanvien.mnv);
+		in(15,wherey(),p->nhanvien.ho+" "+p->nhanvien.ten);
+		in(35,wherey(),toString(p->nhanvien.shd)+"\n");	
+		if(i==10)break;	
+	}
+	cout << "\n\nNhan phim bat ki de thoat...";
+	getch();
+	flag = menuchinh;
+}
+
+void gdThongKeHoaDon(){
+	xoaManHinh();
+	cout << "THONG KE HOA DON TRONG THANG" << endl << endl;
+	cout << "Thang:    Nam: ";
+	gotoxy(7,wherey());
+	string thang = nhap(SO,2);
+	if(thang=="thoat")return;
+	gotoxy(15,wherey());
+	string nam = nhap(SO,4);
+	if(nam=="thoat")return;
+	
+	DSHD temp;
+	char x=0;
+	int n = laySoNgay(toInt(thang),toInt(nam));
+	for(DSHD p=tcHoaDon; p!=NULL; p=p->next){
+		if((p->hoadon.ngay.ngay>=1 && p->hoadon.ngay.ngay<=n) && p->hoadon.ngay.thang == toInt(thang) && p->hoadon.ngay.nam == toInt(nam)){
+			themHoaDon(temp,p->hoadon);
+//			x=x;						//magicccccc+++++++++
+											//i decided to stop programming
+		}
+	}
+	cout << endl << endl;
+	inTatCaHoaDon(wherex(),wherey(),temp);
 	cout << "\n\nNhan phim bat ki de thoat...";
 	getch();
 	flag = menuchinh;
@@ -884,6 +967,12 @@ int main(int argc, char** argv) {
 				break;
 			case inhoadon:
 				gdTatCaHoaDon();
+				break;
+			case thongkehd:
+				gdThongKeHoaDon();
+				break;
+			case topnv:
+				gdTopNV();
 				break;
 		}
 	}
