@@ -447,7 +447,7 @@ int main(int argc, char** argv) {
 	loadHangHoa();
 	loadNhanVien();
 	loadHoaDon();
-	loadCTHoaDon();
+//	loadCTHoaDon();
 	
 	xoaManHinh();
 	flag = menuchinh;
