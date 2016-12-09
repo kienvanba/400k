@@ -6,13 +6,8 @@
 
 using namespace std;
 
-
+//---------------------khai bao-------------------
 /** Chi Tiet Hoa Don */
-typedef struct{
-	int ngay;
-	int thang;
-	int nam;
-}Ngay;
 
 typedef struct{
 	float mahh;
@@ -24,7 +19,7 @@ struct ct_hoa_don{
 	int n;
 	CTHoaDon ds[MAXLIST];
 };
-typedef struct ct_hoa_don CTHD;
+typedef struct ct_hoa_don CTHD; // danh sach tuyen tinh
 
 /** Hoa Don */
 typedef struct{
@@ -38,9 +33,11 @@ struct hoa_don{
 	HoaDon hoadon;
 	hoa_don* next;
 };
-typedef struct hoa_don* DSHD;
+typedef struct hoa_don* DSHD; // danh sach lien ket don
 
 DSHD tcHoaDon;
+
+//----------------het khai bao----------------
 
 /** chi tiet hoa don */
 void themCTHoaDon(CTHD &ds, CTHoaDon cthd){
@@ -132,6 +129,33 @@ void inTatCaHoaDon(int x, int y, DSHD &ds){
 	}
 }
 
+void loadCTHoaDon(DSHD &ds){
+	string filename = ds->hoadon.sohd+".txt";
+	fstream file(filename.c_str(),ios::in);
+	if(!file){
+		return;
+	}else{
+		string line;
+		while(!file.eof()){
+			CTHoaDon cthd;
+			getline(file,line);
+			if(line=="")break;
+			cthd.mahh = toFloat(line);
+			
+			getline(file,line);
+			cthd.soluong = toInt(line);
+			
+			getline(file,line);
+			cthd.dongia = toFloat(line);
+			
+			getline(file,line);
+			cthd.vat = toFloat(line);
+			
+			themCTHoaDon(ds->hoadon.cthd,cthd);
+		}
+	}
+	file.close();
+}
 void loadHoaDon(){
 	string filename = "hoadon.txt";
 	fstream file(filename.c_str(),ios::in);
@@ -156,51 +180,23 @@ void loadHoaDon(){
 			p.lhd = line;
 			p.cthd.n=0;
 			themHoaDon(tcHoaDon, p);
+			DSHD dshd = layHoaDon(p.sohd,tcHoaDon);
+			loadCTHoaDon(dshd);
 		}
 	}
 	file.close();
 }
-void loadCTHoaDon(){
-	string filename = "cthoadon.txt";
-	fstream file(filename.c_str(),ios::in);
-	if(!file){
-		return;
-	}else{
-		string line;
-		while(!file.eof()){
-			CTHoaDon cthd;
-			getline(file,line);
-			if(line=="")break;
-			DSHD hd = layHoaDon(line,tcHoaDon);
-			
-			getline(file,line);
-			cthd.mahh = toFloat(line);
-			
-			getline(file,line);
-			cthd.soluong = toInt(line);
-			
-			getline(file,line);
-			cthd.dongia = toFloat(line);
-			
-			getline(file,line);
-			cthd.vat = toFloat(line);
-			
-			themCTHoaDon(hd->hoadon.cthd,cthd);
-		}
-	}
-	file.close();
-}
-void ghiCTHoaDon(CTHD &ds){
-	string filename = "cthoadon.txt";
+void ghiCTHoaDon(DSHD &ds){
+	string filename = ds->hoadon.sohd+".txt";
 	fstream file(filename.c_str(),ios::app);
 	if(!file){
 		return;
 	}
-	for(int i=0;i<ds.n;i++){
-		file << toString(ds.ds[i].mahh) << endl
-		<< ds.ds[i].soluong << endl
-		<< ds.ds[i].dongia << endl
-		<< ds.ds[i].vat << endl;
+	for(int i=0;i<ds->hoadon.cthd.n;i++){
+		file << ds->hoadon.cthd.ds[i].mahh<< endl
+		<< ds->hoadon.cthd.ds[i].soluong << endl
+		<< ds->hoadon.cthd.ds[i].dongia << endl
+		<< ds->hoadon.cthd.ds[i].vat << endl;
 	}
 	file.close();
 }
@@ -217,7 +213,7 @@ void ghiHoaDon(){
 		<< p->hoadon.ngay.nam << endl
 		<< p->hoadon.manv << endl
 		<< p->hoadon.lhd << endl;
-		ghiCTHoaDon(p->hoadon.cthd);
+		ghiCTHoaDon(p);
 	}
 	file.close();
 }

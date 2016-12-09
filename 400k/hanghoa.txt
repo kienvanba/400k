@@ -1,24 +1,8 @@
-1.6
-ASUS
-may
-100
+1
+omo
+goi
+50
 2
-ACER
-may
-30
-3
-Tu Lanh Toshiba Sony SamSung
-cai
-100
-4
-Bot Giat OMO VIDAN VINAMILK
-bich
-100
-5
-Thuoc Tru Sau DrThanh
-chai
-1000
-16
-RER
-coin
-80
+visual
+program
+1

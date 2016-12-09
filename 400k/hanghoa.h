@@ -6,6 +6,7 @@
 
 using namespace std;
 
+//---------------khai bao hang hoa-------------
 typedef struct{
 	string tenhh;
 	string dvt;
@@ -20,6 +21,8 @@ struct hang_hoa{
 typedef struct hang_hoa *DSHH;
 
 DSHH tcHangHoa;
+
+//--------------het khai bao -------------------
 
 DSHH taoHangHoa(float mahh,HangHoa hanghoa){
 	DSHH temp;

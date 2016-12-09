@@ -30,6 +30,13 @@ using namespace std;
 
 
 int flag;
+
+typedef struct{
+	int ngay;
+	int thang;
+	int nam;
+}Ngay; // tao 1 khoi chua ngay thang nam;
+
 void reSize(int w,int h){
 	HWND console = GetConsoleWindow();
 	RECT r;
@@ -117,4 +124,108 @@ string nhap(int kieu, int size){
 		c=getch();
 	}
 	return res;
+}
+
+Ngay nhap(){
+	string ngay="", thang="", nam="";
+	Ngay n;
+	n.ngay = toInt(ngay);
+	n.thang = toInt(thang);
+	n.nam = toInt(nam);
+	int startx = wherex();
+	int starty = wherey();
+	int currentType=0;
+	cout <<"  /  /";
+	gotoxy(startx,starty);
+	int c=0;
+	while(1){
+		short x= wherex(),y=wherey();
+		if(ktSo(c) || c==32){
+			switch(currentType){
+				case 0:
+					if(ngay.length()<2){
+						ngay+=c;
+						if(toInt(ngay)>31)ngay="31";
+						in(startx,starty,ngay);
+					}
+					break;
+				case 1:
+					if(thang.length()<2){
+						thang+=c;
+						if(toInt(thang)>12)thang="12";
+						in(startx+3,starty,thang);
+					}
+					break;
+				case 2:
+					if(nam.length()<4){
+						nam+=c;
+						in(startx+6,starty,nam);
+					}
+					break;
+			}
+		}else if(c==ESCAPE){
+			flag = menuchinh;
+			n.ngay=1000;
+			break;
+		}else if(c==BACKSPACE){
+//			in(startx,starty,khoangTrang(res.length()));
+//			res = res.substr(0,res.length()-1);
+//			in(startx,starty,res);
+			switch(currentType){
+				case 0:
+					in(startx,starty,khoangTrang(ngay.length()));
+					ngay = ngay.substr(0,ngay.length()-1);
+					in(startx,starty,ngay);
+					break;
+				case 1:
+					in(startx+3,starty,khoangTrang(thang.length()));
+					thang = thang.substr(0,thang.length()-1);
+					in(startx+3,starty,thang);
+					break;
+				case 2:
+					in(startx+6,starty,khoangTrang(nam.length()));
+					nam = nam.substr(0,nam.length()-1);
+					in(startx+6,starty,nam);
+					break;
+			}
+		}else if(c==ENTER){
+			switch(currentType){
+				case 0:
+					if(ngay==""){
+						ngay = "1";
+						in(startx,starty,ngay);
+					}
+					currentType=1;
+					gotoxy(startx+3,starty);
+					break;
+				case 1:
+					if(thang==""){
+						thang = "1";
+						in(startx+3,starty,thang);
+					}
+					if(toInt(ngay)>laySoNgay(toInt(thang),4)){
+						ngay = toString(laySoNgay(toInt(thang),4));
+						in(startx,starty,ngay);
+					}
+					currentType=2;
+					gotoxy(startx+6,starty);
+					break;
+				case 2:
+					if(nam==""){
+						nam = "2016";
+						in(startx+6,starty,nam);
+					}
+					if(toInt(ngay)==29 && toInt(thang)==2 && toInt(nam)%4!=0){
+						ngay = "28";
+						in(startx,starty,ngay);
+					}
+					n.ngay = toInt(ngay);
+					n.thang = toInt(thang);
+					n.nam = toInt(nam);
+					return n;
+			}
+		}
+		c=getch();
+	}
+	return n;
 }
